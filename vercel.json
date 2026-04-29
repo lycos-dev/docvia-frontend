@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://docvia-backend-production.up.railway.app/api/:path*"
+      "destination": "https://docvia-backend-production-281b.up.railway.app/api/:path*"
     },
     {
       "source": "/(.*)",
