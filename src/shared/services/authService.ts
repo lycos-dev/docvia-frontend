@@ -1,4 +1,4 @@
-const BASE = '/api/auth';
+const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api/auth`;
 
 import { supabase } from '../utils/supabaseClient';
 
@@ -161,4 +161,3 @@ export async function verifyGoogleSession(): Promise<AuthResult> {
     return { success: false, error: 'Failed to verify Google session' };
   }
 }
-

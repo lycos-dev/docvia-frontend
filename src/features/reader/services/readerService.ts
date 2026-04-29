@@ -1,4 +1,4 @@
-const BASE = '/api/pdf';
+const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api/pdf`;
 
 // Safely parse JSON — returns a fallback if the body is empty or non-JSON
 async function safeJson<T>(res: Response, fallback: T): Promise<T> {
