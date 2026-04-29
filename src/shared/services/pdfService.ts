@@ -1,4 +1,4 @@
-const BASE = 'https://docvia-backend-production-281b.up.railway.app/api/pdf';
+const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api/pdf';
 
 export interface PDFFile {
   filename: string;   // storage name — used as pdfId (e.g. "1234_abc_myfile.pdf")

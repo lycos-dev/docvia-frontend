@@ -1,4 +1,4 @@
-const BASE = 'https://docvia-backend-production-281b.up.railway.app/api/auth';
+const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api/auth';
 
 import { supabase } from '../utils/supabaseClient';
 
