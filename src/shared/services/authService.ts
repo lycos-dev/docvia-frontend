@@ -1,6 +1,6 @@
-const BASE = (import.meta.env.VITE_API_URL ?? '') + '/api/auth';
+const BASE = (import.meta.env.VITE_API_URL ?? "") + "/api/auth";
 
-import { supabase } from '../utils/supabaseClient';
+import { supabase } from "../utils/supabaseClient";
 
 export interface AuthUser {
   id: string;
@@ -40,12 +40,12 @@ async function safeJson<T>(res: Response, fallback: T): Promise<T> {
 async function apiPost(
   path: string,
   body: Record<string, unknown>,
-  token?: string
+  token?: string,
 ): Promise<Response> {
   return fetch(`${BASE}${path}`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(body),
@@ -58,53 +58,75 @@ async function apiGet(path: string, token: string): Promise<Response> {
   });
 }
 
-export async function login(email: string, password: string): Promise<AuthResult> {
-  const res = await apiPost('/login', { email, password });
-  return safeJson<AuthResult>(res, { success: false, error: 'Server did not return a response.' });
+export async function login(
+  email: string,
+  password: string,
+): Promise<AuthResult> {
+  const res = await apiPost("/login", { email, password });
+  return safeJson<AuthResult>(res, {
+    success: false,
+    error: "Server did not return a response.",
+  });
 }
 
 export async function register(
   email: string,
   password: string,
-  username?: string
+  username?: string,
 ): Promise<AuthResult> {
-  const res = await apiPost('/register', { email, password, username });
-  return safeJson<AuthResult>(res, { success: false, error: 'Server did not return a response.' });
+  const res = await apiPost("/register", { email, password, username });
+  return safeJson<AuthResult>(res, {
+    success: false,
+    error: "Server did not return a response.",
+  });
 }
 
 export async function forgotPassword(email: string): Promise<SimpleResult> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://docvia-frontend-deploy.vercel.app/create-new-password',
+      // Dynamically uses localhost in dev, and vercel url in production
+      redirectTo: `${window.location.origin}/create-new-password`,
     });
 
     if (error) {
-      console.error('forgotPassword error:', error);
+      console.error("forgotPassword error:", error);
       return { success: false, error: error.message };
     }
 
-    return { success: true, message: 'Password reset email sent. Check your inbox.' };
+    return {
+      success: true,
+      message: "Password reset email sent. Check your inbox.",
+    };
   } catch (error) {
-    console.error('forgotPassword unexpected error:', error);
-    return { success: false, error: (error as Error)?.message ?? 'Unable to send reset link.' };
+    console.error("forgotPassword unexpected error:", error);
+    return {
+      success: false,
+      error: (error as Error)?.message ?? "Unable to send reset link.",
+    };
   }
 }
 
 export async function resetPassword(
   token: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<SimpleResult> {
-  const res = await apiPost('/reset-password', { token, newPassword });
-  return safeJson<SimpleResult>(res, { success: false, error: 'Server did not return a response.' });
+  const res = await apiPost("/reset-password", { token, newPassword });
+  return safeJson<SimpleResult>(res, {
+    success: false,
+    error: "Server did not return a response.",
+  });
 }
 
 export async function getProfile(token: string): Promise<AuthResult> {
-  const res = await apiGet('/profile', token);
-  return safeJson<AuthResult>(res, { success: false, error: 'Server did not return a response.' });
+  const res = await apiGet("/profile", token);
+  return safeJson<AuthResult>(res, {
+    success: false,
+    error: "Server did not return a response.",
+  });
 }
 
 export async function logout(token: string): Promise<SimpleResult> {
-  const res = await apiPost('/logout', {}, token);
+  const res = await apiPost("/logout", {}, token);
   return safeJson<SimpleResult>(res, { success: false });
 }
 
@@ -115,26 +137,26 @@ export async function logout(token: string): Promise<SimpleResult> {
 export async function loginWithGoogle(): Promise<void> {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
         queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
+          access_type: "offline",
+          prompt: "consent",
         },
       },
     });
 
     if (error) {
-      console.error('Google OAuth error:', error);
-      throw new Error(error.message || 'Failed to initiate Google sign-in');
+      console.error("Google OAuth error:", error);
+      throw new Error(error.message || "Failed to initiate Google sign-in");
     }
 
     if (data?.url) {
       window.location.href = data.url;
     }
   } catch (error) {
-    console.error('loginWithGoogle error:', error);
+    console.error("loginWithGoogle error:", error);
     throw error;
   }
 }
@@ -149,7 +171,7 @@ export async function getSession() {
     if (error) throw error;
     return data.session;
   } catch (error) {
-    console.error('getSession error:', error);
+    console.error("getSession error:", error);
     return null;
   }
 }
@@ -161,16 +183,21 @@ export async function getSession() {
 export async function verifyGoogleSession(): Promise<AuthResult> {
   try {
     const session = await getSession();
-    
+
     if (!session?.access_token) {
-      return { success: false, error: 'No valid session found' };
+      return { success: false, error: "No valid session found" };
     }
 
     // Send the Supabase access token to our backend to verify and get a JWT
-    const res = await apiPost('/google/verify', { access_token: session.access_token });
-    return safeJson<AuthResult>(res, { success: false, error: 'Server did not return a response.' });
+    const res = await apiPost("/google/verify", {
+      access_token: session.access_token,
+    });
+    return safeJson<AuthResult>(res, {
+      success: false,
+      error: "Server did not return a response.",
+    });
   } catch (error) {
-    console.error('verifyGoogleSession error:', error);
-    return { success: false, error: 'Failed to verify Google session' };
+    console.error("verifyGoogleSession error:", error);
+    return { success: false, error: "Failed to verify Google session" };
   }
 }

@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Logo } from '../components/Logo';
-import { SignInForm } from '../components/SignInForm';
-import type { SignInFormData } from '../types';
-import { motion } from 'framer-motion';
-import { useAuth } from '../../../shared/contexts/AuthContext';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Logo } from "../components/Logo";
+import { SignInForm } from "../components/SignInForm";
+import type { SignInFormData } from "../types";
+import { motion } from "framer-motion";
+import { useAuth } from "../../../shared/contexts/AuthContext";
 
 export const SignInPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,12 +14,20 @@ export const SignInPage: React.FC = () => {
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-    const token = hashParams.get('access_token') ?? queryParams.get('access_token') ?? queryParams.get('token');
-    const type = hashParams.get('type') ?? queryParams.get('type');
+    const hashParams = new URLSearchParams(
+      window.location.hash.replace(/^#/, ""),
+    );
+    const token =
+      hashParams.get("access_token") ??
+      queryParams.get("access_token") ??
+      queryParams.get("token");
+    const type = hashParams.get("type") ?? queryParams.get("type");
 
-    if (token && type === 'recovery') {
-      navigate(`/create-new-password${window.location.search}${window.location.hash}`, { replace: true });
+    if (token && type === "recovery") {
+      navigate(
+        `/create-new-password${window.location.search}${window.location.hash}`,
+        { replace: true },
+      );
     }
   }, [navigate]);
 
@@ -29,9 +37,9 @@ export const SignInPage: React.FC = () => {
     const result = await login(data.email, data.password);
     setIsLoading(false);
     if (result.success) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     } else {
-      setError(result.error ?? 'Sign in failed. Please try again.');
+      setError(result.error ?? "Sign in failed. Please try again.");
     }
   };
 
@@ -39,7 +47,7 @@ export const SignInPage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: 0 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: 'easeIn' }}
+      transition={{ duration: 0.5, ease: "easeIn" }}
       className="min-h-screen w-full bg-[#F5F5F5] dark:bg-[#0f172a] flex items-center justify-center p-4 transition-colors"
     >
       <div className="w-full max-w-lg">
@@ -58,8 +66,8 @@ export const SignInPage: React.FC = () => {
           )}
           <SignInForm
             onSubmit={handleSignIn}
-            onSignUpClick={() => navigate('/signup')}
-            onForgotPasswordClick={() => navigate('/forgot-password')}
+            onSignUpClick={() => navigate("/signup")}
+            onForgotPasswordClick={() => navigate("/forgot-password")}
             isLoading={isLoading}
           />
         </div>
