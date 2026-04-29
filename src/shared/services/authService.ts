@@ -73,8 +73,21 @@ export async function register(
 }
 
 export async function forgotPassword(email: string): Promise<SimpleResult> {
-  const res = await apiPost('/forgot-password', { email });
-  return safeJson<SimpleResult>(res, { success: false, error: 'Server did not return a response.' });
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/create-new-password`,
+    });
+
+    if (error) {
+      console.error('forgotPassword error:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, message: 'Password reset email sent. Check your inbox.' };
+  } catch (error) {
+    console.error('forgotPassword unexpected error:', error);
+    return { success: false, error: (error as Error)?.message ?? 'Unable to send reset link.' };
+  }
 }
 
 export async function resetPassword(

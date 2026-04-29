@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Input } from '../../../shared/components/ui/Input';
 import { Button } from '../../../shared/components/ui/Button';
 import { useTheme } from '../../../shared/contexts/ThemeContext';
+import { supabase } from '../../../shared/utils/supabaseClient';
 import * as authService from '../../../shared/services/authService';
 
 function getStrength(pw: string): { score: number; label: string; color: string } {
@@ -29,27 +30,43 @@ export const CreateNewPasswordPage: React.FC = () => {
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [tokenChecked, setTokenChecked] = useState(false);
   const navigate = useNavigate();
 
   const strength = getStrength(password);
 
   useEffect(() => {
-    // Extract token from URL hash (Supabase sends it as #access_token=...&type=recovery)
-    const hash = window.location.hash.replace('#', '');
-    console.log('🔑 Reset page hash:', hash);
-    
-    const params = new URLSearchParams(hash);
-    const token = params.get('access_token');
-    const type = params.get('type');
-    
-    console.log('📝 Extracted token:', token ? 'found' : 'not found');
-    console.log('📝 Recovery type:', type);
-    
-    if (!token) {
-      console.warn('⚠️ No access token found in URL. This page should only be accessed via the password reset email link.');
-    }
-    
-    setAccessToken(token);
+    const checkRecoveryToken = async () => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+
+      const token = hashParams.get('access_token') ?? queryParams.get('access_token') ?? queryParams.get('token');
+      const type = hashParams.get('type') ?? queryParams.get('type');
+
+      console.log('🔑 Reset page query:', window.location.search);
+      console.log('🔑 Reset page hash:', window.location.hash);
+      console.log('📝 Extracted token:', token ? 'found' : 'not found');
+      console.log('📝 Recovery type:', type);
+
+      if (token) {
+        setAccessToken(token);
+        setTokenChecked(true);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (!error && data?.session?.access_token) {
+          setAccessToken(data.session.access_token);
+        }
+      } catch (err) {
+        console.error('Error checking Supabase session for recovery:', err);
+      } finally {
+        setTokenChecked(true);
+      }
+    };
+
+    checkRecoveryToken();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,6 +88,10 @@ export const CreateNewPasswordPage: React.FC = () => {
 
     if (!accessToken) {
       newErrors.confirmPassword = 'Reset link is invalid or expired. Please request a new one.';
+    }
+
+    if (!tokenChecked) {
+      newErrors.confirmPassword = 'Checking reset token... please wait.';
     }
 
     if (Object.keys(newErrors).length > 0) {
