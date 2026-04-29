@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../components/Logo';
 import { SignInForm } from '../components/SignInForm';
@@ -11,6 +11,17 @@ export const SignInPage: React.FC = () => {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const token = hashParams.get('access_token') ?? queryParams.get('access_token') ?? queryParams.get('token');
+    const type = hashParams.get('type') ?? queryParams.get('type');
+
+    if (token && type === 'recovery') {
+      navigate(`/create-new-password${window.location.search}${window.location.hash}`, { replace: true });
+    }
+  }, [navigate]);
 
   const handleSignIn = async (data: SignInFormData) => {
     setIsLoading(true);
