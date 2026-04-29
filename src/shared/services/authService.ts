@@ -75,7 +75,7 @@ export async function register(
 export async function forgotPassword(email: string): Promise<SimpleResult> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/create-new-password`,
+      redirectTo: 'https://docvia-frontend-deploy.vercel.app/create-new-password',
     });
 
     if (error) {
