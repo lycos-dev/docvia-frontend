@@ -7,6 +7,8 @@ import { cn } from '../../../shared/utils/cn';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
+const API_BASE = (import.meta.env.VITE_API_URL ?? '') + '/api/pdf';
+
 interface PDFViewerProps {
   documentId: string;
   initialPage?: number;
@@ -120,7 +122,7 @@ export default function PDFViewer({ documentId, initialPage = 1, isDark, token }
 
     const load = async () => {
       try {
-        const res = await fetch(`/api/pdf/file/${encodeURIComponent(documentId)}`, {
+        const res = await fetch(`${API_BASE}/file/${encodeURIComponent(documentId)}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
 
