@@ -7,7 +7,8 @@ import { cn } from '../../../shared/utils/cn';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-const API_BASE = (import.meta.env.VITE_API_URL ?? '') + '/api/pdf';
+// Use whichever API base URL env var is configured (both are supported)
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '') + '/api/pdf';
 
 interface PDFViewerProps {
   documentId: string;
